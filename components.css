@@ -9,7 +9,8 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 16px;
+    padding: 
+        6px 16px;
 
     border-radius: 30px;
     font-size: 0.85rem;

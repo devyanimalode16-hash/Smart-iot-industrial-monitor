@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Smart IoT-Based Industrial Equipment Monitoring and Fault Detection System - ENTC Engineering Simulation Dashboard">
+    <title>Smart IIoT Equipment Monitor & Fault Detection System | SCADA HMI</title>
+
+    <!-- Design System Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- SCADA Header & Telemetry Topbar -->
+    <header class="scada-header" id="scadaHeader">
+        <div class="brand-section">
+            <div class="brand-logo">⚡</div>
+            <div class="brand-info">
+                <h1>Smart IIoT Industrial Equipment Monitoring</h1>
+                <div class="subtext">ENTC Engineering Final Year Project • Virtual ESP32 Simulation</div>
+            </div>
+        </div>
+
+        <div class="header-telemetry-meta">
+            <div class="meta-pill" title="Virtual ESP32 Microcontroller Node">
+                <span>Node:</span>
+                <strong id="nodeId">ESP32-IND-01</strong>
+            </div>
+            <div class="meta-pill" title="Simulated Mesh Network Signal">
+                <span>WiFi Mesh:</span>
+                <strong id="wifiRSSI">-58 dBm</strong>
+            </div>
+            <div class="meta-pill" title="Microcontroller Active Uptime">
+                <span>Uptime:</span>
+                <strong id="deviceUptime">00:00:00</strong>
+            </div>
+            <div class="meta-pill" title="Local System Clock">
+                <span>Clock:</span>
+                <strong id="systemClock">--:--:--</strong>
+            </div>
+        </div>
+
+        <div class="header-controls">
+            <button class="btn btn-outline" id="btnMuteAudio" title="Toggle SCADA Alarm Siren">🔔 Siren: Active</button>
+            <button class="btn btn-outline" id="btnPauseTelemetry" title="Pause Real-Time Stream">⏸ Pause
+                Stream</button>
+            <button class="btn btn-primary" id="btnExportCSV" title="Export Historical Audit Data to CSV">📥 Export
+                CSV</button>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="dashboard-container">
+
+        <!-- Machine Status & Health Banner -->
+        <section class="machine-banner" id="machineBanner">
+            <div class="machine-identity">
+                <div class="machine-icon-box">⚙️</div>
+                <div class="machine-names">
+                    <h2>Primary Induction Motor Drive (7.5 kW)</h2>
+                    <p>Asset ID: <span class="font-mono">MOT-IND-415V-09</span> • Location: Substation Cell 3B •
+                        Standard: ISO 10816-3</p>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+                <div>
+                    <div class="text-small text-muted" style="margin-bottom: 4px;">OPERATIONAL STATUS</div>
+                    <div id="overallStatusBadge" class="status-pill status-normal">
+                        <span id="statusPulseDot" class="pulse-dot pulse-normal"></span>
+                        OPTIMAL OPERATIONAL
+                    </div>
+                </div>
+
+                <div style="min-width: 180px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 4px;">
+                        <span class="text-muted">EQUIPMENT HEALTH</span>
+                        <strong id="healthScoreText" class="font-mono"
+                            style="color: var(--accent-green);">98.5%</strong>
+                    </div>
+                    <div class="linear-gauge-track" style="height: 8px;">
+                        <div id="healthScoreBar" class="linear-gauge-fill"
+                            style="width: 98.5%; background-color: var(--accent-green);"></div>
+                    </div>
+                    <div id="healthStatusLabel" class="text-small text-muted">Condition: Excellent</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Metric Cards Grid -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-title">Availability / Uptime</div>
+                <div class="kpi-value" id="kpiUptime" style="color: var(--accent-cyan);">99.4%</div>
+                <div class="kpi-sub">Continuous telemetry cycle</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Estimated MTBF</div>
+                <div class="kpi-value" id="kpiMTBF" style="color: var(--accent-blue);">2400 hrs</div>
+                <div class="kpi-sub">Mean Time Between Failures</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Total Faults Logged</div>
+                <div class="kpi-value" id="kpiAnomalies" style="color: var(--accent-amber);">0</div>
+                <div class="kpi-sub">Anomalies classified</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Telemetry Packets</div>
+                <div class="kpi-value" id="kpiSamples" style="color: var(--accent-purple);">0</div>
+                <div class="kpi-sub">Virtual ESP32 ADC frames</div>
+            </div>
+        </section>
+
+        <!-- Main SCADA Layout Matrix -->
+        <div class="dashboard-matrix">
+
+            <!-- LEFT COLUMN: Real-Time Charts & Physical Sensors -->
+            <div class="panel-col">
+
+                <!-- SENSORS METRICS SUMMARY CARDS -->
+                <div class="sensors-grid">
+
+                    <!-- Temperature Card -->
+                    <div class="sensor-card">
+                        <div class="sensor-card-top">
+                            <span class="sensor-name">🌡️ Motor Winding Temperature</span>
+                            <span id="tempStatusBadge" class="badge badge-normal">NORMAL</span>
+                        </div>
+                        <div class="sensor-metric-hero">
+                            <span class="metric-big-number" id="tempValue">42.0</span>
+                            <span class="metric-unit">°C (PT100 RTD)</span>
+                        </div>
+                        <div class="linear-gauge-track">
+                            <div id="tempGaugeFill" class="linear-gauge-fill gauge-temp-fill" style="width: 27%;"></div>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                            <span>Ambient: 27.5°C</span>
+                            <span>Warning: 75°C</span>
+                            <span>Critical: 88°C</span>
+                        </div>
+                    </div>
+
+                    <!-- Vibration Card -->
+                    <div class="sensor-card">
+                        <div class="sensor-card-top">
+                            <span class="sensor-name">📊 Mechanical Vibration (RMS)</span>
+                            <span id="vibZoneBadge" class="badge badge-normal">Zone A (Good)</span>
+                        </div>
+                        <div class="sensor-metric-hero">
+                            <span class="metric-big-number" id="vibRMSValue">1.45</span>
+                            <span class="metric-unit">mm/s (MPU6050)</span>
+                        </div>
+                        <div class="linear-gauge-track">
+                            <div id="vibGaugeFill" class="linear-gauge-fill gauge-vib-fill" style="width: 14%;"></div>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                            <span>Peak: <strong id="vibPeakValue" class="font-mono">2.10</strong> mm/s</span>
+                            <span>1X Freq: <strong id="vibFreqValue" class="font-mono">24.1</strong> Hz</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- LIVE REAL-TIME OSCILLOSCOPE & TEMPERATURE CHART PANEL -->
+                <div class="scada-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">📈 Real-Time Temperature Thermal Trend (°C)</div>
+                        <span class="text-small text-muted font-mono">1.0 Hz Streaming • 40s Rolling Horizon</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="tempChartCanvas" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- VIBRATION TREND & TIME-DOMAIN OSCILLOSCOPE PANEL -->
+                <div class="scada-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">🌊 Real-Time Vibration Velocity & Oscilloscope (ISO 10816-3)</div>
+                        <span class="text-small text-muted font-mono">RMS Severity Band & Waveform</span>
+                    </div>
+                    <div class="chart-wrapper" style="height: 180px;">
+                        <canvas id="vibChartCanvas" class="chart-canvas"></canvas>
+                    </div>
+
+                    <!-- High-Frequency Oscilloscope Display -->
+                    <div class="oscilloscope-box" style="margin-top: 16px;">
+                        <div class="oscilloscope-header">
+                            <span>TIME-DOMAIN VIBRATION OSCILLOSCOPE (ACCELERATION DERIVATIVE)</span>
+                            <span>SAMPLE: 200 Hz SYNTHETIC ADC</span>
+                        </div>
+                        <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- ELECTRICAL & MOTOR OPERATION PANEL -->
+                <div class="scada-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">⚡ Electrical Telemetry & Power Drive</div>
+                        <span class="text-small text-muted">SCT-013-000 CT Sensor Simulation</span>
+                    </div>
+                    <div class="elec-grid">
+                        <div class="elec-item">
+                            <div class="elec-label">Motor Speed</div>
+                            <div class="elec-val"><span id="rpmValue">1445</span> <small
+                                    style="font-size: 0.7rem;">RPM</small></div>
+                        </div>
+                        <div class="elec-item">
+                            <div class="elec-label">Current Draw</div>
+                            <div class="elec-val"><span id="currentValue">11.2</span> <small
+                                    style="font-size: 0.7rem;">A</small></div>
+                        </div>
+                        <div class="elec-item">
+                            <div class="elec-label">Line Voltage</div>
+                            <div class="elec-val"><span id="voltageValue">415</span> <small style="font-size: 0.7rem;">V
+                                    AC</small></div>
+                        </div>
+                        <div class="elec-item">
+                            <div class="elec-label">Active Power</div>
+                            <div class="elec-val"><span id="powerValue">6.88</span> <small
+                                    style="font-size: 0.7rem;">kW</small></div>
+                        </div>
+                        <div class="elec-item">
+                            <div class="elec-label">Power Factor (cos φ)</div>
+                            <div class="elec-val" id="powerFactorValue">0.86</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Fault Injector, Alarms & Telemetry Terminal -->
+            <div class="panel-col">
+
+                <!-- FAULT INJECTION CONTROLLER (VIVA DEMO PANEL) -->
+                <div class="scada-panel" style="border-color: rgba(6, 182, 212, 0.3);">
+                    <div class="panel-header">
+                        <div class="panel-title">🧪 Fault Injection Controller (Demo Engine)</div>
+                    </div>
+                    <p class="text-small text-muted">
+                        Simulate real-world industrial anomalies to test automatic fault detection, ISO 10816-3 alerts,
+                        and SCADA alarm sirens:
+                    </p>
+
+                    <!-- Quick Scenario Selector -->
+                    <div style="margin-top: 12px;">
+                        <label class="text-small text-muted" for="scenarioSelect">PRESET DEMO SCENARIO:</label>
+                        <select id="scenarioSelect" class="scada-select">
+                            <option value="NORMAL_BASELINE">🟢 Normal Baseline Operation</option>
+                            <option value="BEARING_DEGRADATION">🟠 Bearing Defect (Vibration Harmonic Spike)</option>
+                            <option value="THERMAL_OVERLOAD">🔴 Cooling Fan Blockage (Thermal Runaway)</option>
+                            <option value="SHAFT_UNBALANCE">🔴 Rotor Mechanical Unbalance</option>
+                            <option value="GRID_ANOMALY">🟡 Grid Voltage Sag (345V Current Spike)</option>
+                            <option value="CATASTROPHIC_TRIP">💥 Multi-Failure Catastrophic Fault</option>
+                            <option value="EMERGENCY_SHUTDOWN">🛑 Emergency Stop (Zero RPM Interlock)</option>
+                        </select>
+                    </div>
+
+                    <!-- Individual Fault Toggle Buttons -->
+                    <div class="fault-injector-grid">
+                        <button class="btn-fault" data-fault="overheat">
+                            <span>🔥 Stator Overheat</span>
+                            <span class="btn-fault-indicator"></span>
+                        </button>
+                        <button class="btn-fault" data-fault="bearingDefect">
+                            <span>⚙️ Bearing Play</span>
+                            <span class="btn-fault-indicator"></span>
+                        </button>
+                        <button class="btn-fault" data-fault="mechanicalUnbalance">
+                            <span>🔄 Unbalance / Play</span>
+                            <span class="btn-fault-indicator"></span>
+                        </button>
+                        <button class="btn-fault" data-fault="coolingFanFailure">
+                            <span>❄️ Fan Failure</span>
+                            <span class="btn-fault-indicator"></span>
+                        </button>
+                        <button class="btn-fault" data-fault="voltageSag">
+                            <span>📉 Voltage Sag</span>
+                            <span class="btn-fault-indicator"></span>
+                        </button>
+                        <button class="btn-fault" data-fault="emergencyStop">
+                            <span>🛑 E-Stop Engaged</span>
+                            <span class="btn-fault-indicator"></span>
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+                        <button class="btn btn-outline" id="btnResetFaults" style="width: 100%;">🔄 Clear All Faults &
+                            Reset Normal</button>
+                    </div>
+                </div>
+
+                <!-- ACTIVE FAULT ALERTS & PRESCRIPTION MATRIX -->
+                <div class="scada-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">🚨 Active Fault Alerts & Prescriptions</div>
+                    </div>
+                    <div class="alerts-list" id="alertsContainer">
+                        <!-- Dynamic Alert Cards rendered by dashboard.js -->
+                    </div>
+                </div>
+
+                <!-- RAW JSON TELEMETRY STREAM (ESP32 MQTT SIMULATOR) -->
+                <div class="scada-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">📡 Virtual ESP32 Telemetry Terminal</div>
+                        <span class="text-small text-muted font-mono">JSON / MQTT</span>
+                    </div>
+                    <p class="text-small text-muted" style="margin-bottom: 8px;">
+                        Live JSON payload generated by the Virtual ESP32 Node:
+                    </p>
+                    <pre class="terminal-box"
+                        id="terminalContent">{ "status": "Connecting to Virtual ESP32 Node..." }</pre>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- HISTORICAL TIME-SERIES AUDIT DATA TABLE -->
+        <section class="scada-panel" style="margin-top: 10px;">
+            <div class="panel-header">
+                <div class="panel-title">📑 Historical Telemetry Audit Log & Analytics</div>
+                <div class="table-filter-group">
+                    <button class="table-filter-btn active" data-filter="ALL">All Logs</button>
+                    <button class="table-filter-btn" data-filter="NORMAL">Normal</button>
+                    <button class="table-filter-btn" data-filter="WARNING">Warning</button>
+                    <button class="table-filter-btn" data-filter="CRITICAL">Critical</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="scada-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Temperature</th>
+                            <th>Vibration RMS</th>
+                            <th>Current</th>
+                            <th>Power</th>
+                            <th>Speed (RPM)</th>
+                            <th>Status</th>
+                            <th>Diagnostic Observations</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- Dynamic Historical Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Application JavaScript Subsystems -->
+    <script src="js/virtual_esp32.js"></script>
+    <script src="js/anomaly_engine.js"></script>
+    <script src="js/sound_alerts.js"></script>
+    <script src="js/fault_injector.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

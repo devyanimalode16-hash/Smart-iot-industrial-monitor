@@ -16,6 +16,7 @@ This project requires **NO external software installation**, **NO terminal comma
 3. The dashboard will launch immediately with live real-time telemetry, animated charts, and simulated sensor streams!
 
 ---
+![Smart IOT Industrial Equipment Monitor](devyani.png)
 
 ## 🌟 Key Features
 
